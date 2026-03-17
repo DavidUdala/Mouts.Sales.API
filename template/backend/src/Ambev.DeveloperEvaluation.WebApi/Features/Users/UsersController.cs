@@ -8,6 +8,7 @@ using Ambev.DeveloperEvaluation.WebApi.Features.Users.DeleteUser;
 using Ambev.DeveloperEvaluation.Application.Users.CreateUser;
 using Ambev.DeveloperEvaluation.Application.Users.GetUser;
 using Ambev.DeveloperEvaluation.Application.Users.DeleteUser;
+using OneOf.Types;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Users;
 
@@ -82,8 +83,9 @@ public class UsersController : BaseController
         var command = _mapper.Map<GetUserCommand>(request.Id);
         var response = await _mediator.Send(command, cancellationToken);
 
-        return Ok(new ApiResponseWithData<GetUserResponse>
+        return new JsonResult( new ApiResponseWithData<GetUserResponse>
         {
+
             Success = true,
             Message = "User retrieved successfully",
             Data = _mapper.Map<GetUserResponse>(response)
