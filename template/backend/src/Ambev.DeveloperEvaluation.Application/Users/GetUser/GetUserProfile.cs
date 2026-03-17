@@ -13,6 +13,8 @@ public class GetUserProfile : Profile
     /// </summary>
     public GetUserProfile()
     {
-        CreateMap<User, GetUserResult>();
+        CreateMap<User, GetUserResult>()
+            .ForMember(d => d.Name, opt => opt.MapFrom(s => s.Username));
+
     }
 }
