@@ -3,6 +3,9 @@ using MediatR;
 using FluentValidation;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.Domain.Entities;
+using Ambev.DeveloperEvaluation.Domain.Events;
+using Microsoft.Extensions.Logging;
+using Rebus.Bus;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 
@@ -13,16 +16,26 @@ public class CreateSaleHandler : IRequestHandler<CreateSaleCommand, CreateSaleRe
 {
     private readonly ISaleRepository _saleRepository;
     private readonly IMapper _mapper;
+    private readonly IBus _bus;
+    private readonly ILogger<CreateSaleHandler> _logger;
 
     /// <summary>
     /// Initializes a new instance of CreateSaleHandler
     /// </summary>
     /// <param name="saleRepository">The sale repository</param>
     /// <param name="mapper">The AutoMapper instance</param>
-    public CreateSaleHandler(ISaleRepository saleRepository, IMapper mapper)
+    /// <param name="bus">The Rebus bus instance</param>
+    /// <param name="logger">The logger instance</param>
+    public CreateSaleHandler(
+        ISaleRepository saleRepository,
+        IMapper mapper,
+        IBus bus,
+        ILogger<CreateSaleHandler> logger)
     {
         _saleRepository = saleRepository;
         _mapper = mapper;
+        _bus = bus;
+        _logger = logger;
     }
 
     /// <summary>
@@ -53,6 +66,14 @@ public class CreateSaleHandler : IRequestHandler<CreateSaleCommand, CreateSaleRe
         sale.TotalAmount = sale.Items.Sum(i => i.TotalAmount);
 
         var createdSale = await _saleRepository.CreateAsync(sale, cancellationToken);
+
+        _logger.LogInformation(
+            "Publishing {EventName} to message broker for Sale {SaleNumber}",
+            nameof(SaleCreatedEvent),
+            createdSale.SaleNumber);
+
+        await _bus.Publish(new SaleCreatedEvent(createdSale.Id, createdSale.SaleNumber, createdSale.TotalAmount));
+
         var result = _mapper.Map<CreateSaleResult>(createdSale);
         return result;
     }
