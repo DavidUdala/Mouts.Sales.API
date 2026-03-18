@@ -1,6 +1,7 @@
 using Ambev.DeveloperEvaluation.Application;
 using Ambev.DeveloperEvaluation.Common.HealthChecks;
 using Ambev.DeveloperEvaluation.Common.Logging;
+using Ambev.DeveloperEvaluation.Common.MessageBroker;
 using Ambev.DeveloperEvaluation.Common.Security;
 using Ambev.DeveloperEvaluation.Common.Validation;
 using Ambev.DeveloperEvaluation.IoC;
@@ -52,6 +53,8 @@ public class Program
 
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
+            builder.AddDefaultRebus(typeof(ApplicationLayer).Assembly);
+
             var app = builder.Build();
             app.UseMiddleware<ValidationExceptionMiddleware>();
 
@@ -67,6 +70,7 @@ public class Program
             app.UseAuthorization();
 
             app.UseBasicHealthChecks();
+            app.UseDefaultRebus();
 
             app.MapControllers();
 
