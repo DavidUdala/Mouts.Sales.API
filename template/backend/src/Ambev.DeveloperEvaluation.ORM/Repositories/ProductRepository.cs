@@ -58,6 +58,19 @@ public class ProductRepository : IProductRepository
     }
 
     /// <summary>
+    /// Retrieves all products whose identifiers are contained in the provided set
+    /// </summary>
+    /// <param name="ids">The collection of product identifiers to look up</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The list of products found for the given identifiers</returns>
+    public async Task<IEnumerable<Product>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        return await _context.Products
+            .Where(p => ids.Contains(p.Id))
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <summary>
     /// Deletes a product from the database
     /// </summary>
     /// <param name="id">The unique identifier of the product to delete</param>
