@@ -13,6 +13,11 @@
         public Guid ProductId { get; set; }
 
         /// <summary>
+        /// The denormalized product name
+        /// </summary>
+        public string ProductName { get; set; } = string.Empty;
+
+        /// <summary>
         /// The quantity of the product
         /// </summary>
         public int Quantity { get; set; }
