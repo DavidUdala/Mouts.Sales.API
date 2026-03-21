@@ -9,6 +9,7 @@ using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CancelSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSales;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CancelSaleItem;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale;
 using AutoMapper;
 using MediatR;
@@ -100,7 +101,12 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
             var command = _mapper.Map<GetSaleCommand>(request.Id);
             var response = await _mediator.Send(command, cancellationToken);
 
-            return Ok(_mapper.Map<GetSaleResponse>(response));
+            return Ok(new ApiResponseWithData<GetSaleResponse>
+            {
+                Success = true,
+                Message = "Sale retrieved successfully",
+                Data = _mapper.Map<GetSaleResponse>(response)
+            });
         }
 
         /// <summary>
@@ -131,10 +137,10 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Success response if the sale was updated</returns>
         [HttpPut]
-        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponseWithData<UpdateSaleResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateSaleItem([FromBody] UpdateSaleRequest request , CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateSaleItem([FromBody] UpdateSaleRequest request, CancellationToken cancellationToken)
         {
             var command = _mapper.Map<UpdateSaleCommand>(request);
             var response = await _mediator.Send(command, cancellationToken);
@@ -153,7 +159,12 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
             var command = new CancelSaleItemCommand(id, itemId);
             var response = await _mediator.Send(command, cancellationToken);
 
-            return Ok(response);
+            return Ok(new ApiResponseWithData<CancelSaleItemResponse>
+            {
+                Success = true,
+                Message = "Sale item cancelled successfully",
+                Data = _mapper.Map<CancelSaleItemResponse>(response)
+            });
         }
     }
 }
