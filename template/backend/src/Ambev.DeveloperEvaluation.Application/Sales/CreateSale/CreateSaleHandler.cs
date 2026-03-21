@@ -66,10 +66,10 @@ public class CreateSaleHandler : IRequestHandler<CreateSaleCommand, CreateSaleRe
 
         var productIds = command.Items.Select(i => i.ProductId).Distinct().ToList();
         var foundProducts = await _productRepository.GetByIdsAsync(productIds, cancellationToken);
+        var missingIds = productIds.Except(foundProducts.Select(p => p.Id)).ToList();
 
-        //var missingIds = productIds.Except(foundProducts.Select(p => p.Id)).ToList();
-        //if (missingIds.Any())
-        //    throw new InvalidOperationException($"Products not found: {string.Join(", ", missingIds)}");
+        if (missingIds.Any())
+            throw new InvalidOperationException($"Products not found: {string.Join(", ", missingIds)}");
 
         var sale = _mapper.Map<Sale>(command);
 
