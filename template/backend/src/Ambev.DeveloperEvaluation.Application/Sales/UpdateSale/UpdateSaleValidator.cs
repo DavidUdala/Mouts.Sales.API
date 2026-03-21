@@ -16,48 +16,21 @@ public class UpdateSaleCommandValidator : AbstractValidator<UpdateSaleCommand>
             .NotEmpty()
             .WithMessage("Sale ID is required");
 
-        RuleFor(sale => sale.SaleNumber)
+        RuleFor(sale => sale.Item)
+            .NotNull()
+            .WithMessage("Item is required");
+
+        RuleFor(sale => sale.Item.Id)
             .NotEmpty()
-            .WithMessage("Sale number is required");
+            .WithMessage("Item ID is required");
 
-        RuleFor(sale => sale.CustomerId)
-            .NotEmpty()
-            .WithMessage("Customer ID is required");
-
-        RuleFor(sale => sale.BranchId)
-            .NotEmpty()
-            .WithMessage("Branch ID is required");
-
-        RuleFor(sale => sale.Items)
-            .NotEmpty()
-            .WithMessage("Sale must have at least one item");
-
-        RuleForEach(sale => sale.Items)
-            .SetValidator(new UpdateSaleItemCommandValidator());
-    }
-}
-
-/// <summary>
-/// Validator for UpdateSaleItemCommand.
-/// </summary>
-public class UpdateSaleItemCommandValidator : AbstractValidator<UpdateSaleItemCommand>
-{
-    public UpdateSaleItemCommandValidator()
-    {
-        RuleFor(item => item.ProductId)
-            .NotEmpty()
-            .WithMessage("Product ID is required");
-
-        RuleFor(item => item.Quantity)
+        RuleFor(sale => sale.Item.Quantity)
             .GreaterThan(0)
-            .WithMessage("Quantity must be greater than zero");
+            .LessThanOrEqualTo(20)
+            .WithMessage("Quantity must be between 1 and 20");
 
-        RuleFor(item => item.UnitPrice)
+        RuleFor(sale => sale.Item.UnitPrice)
             .GreaterThan(0)
             .WithMessage("Unit price must be greater than zero");
-
-        RuleFor(item => item.Discount)
-            .GreaterThanOrEqualTo(0)
-            .WithMessage("Discount cannot be negative");
     }
 }

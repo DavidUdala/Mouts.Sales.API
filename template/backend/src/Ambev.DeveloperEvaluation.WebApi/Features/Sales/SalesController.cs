@@ -2,6 +2,7 @@
 using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.Application.Sales.GetSale;
 using Ambev.DeveloperEvaluation.Application.Sales.GetSales;
+using Ambev.DeveloperEvaluation.Application.Sales.UpdateSale;
 using Ambev.DeveloperEvaluation.Application.Users.DeleteUser;
 using Ambev.DeveloperEvaluation.Application.Users.GetUser;
 using Ambev.DeveloperEvaluation.WebApi.Common;
@@ -9,10 +10,12 @@ using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CancelSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSales;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Users.DeleteUser;
 using Ambev.DeveloperEvaluation.WebApi.Features.Users.GetUser;
 using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
@@ -101,12 +104,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
             var command = _mapper.Map<GetSaleCommand>(request.Id);
             var response = await _mediator.Send(command, cancellationToken);
 
-            return new JsonResult(new ApiResponseWithData<GetSaleResponse>
-            {
-                Success = true,
-                Message = "Sale retrieved successfully",
-                Data = _mapper.Map<GetSaleResponse>(response)
-            });
+            return Ok(_mapper.Map<GetSaleResponse>(response));
         }
 
         /// <summary>
@@ -126,12 +124,26 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
             var command = _mapper.Map<CancelSaleCommand>(request.Id);
             var response = await _mediator.Send(command, cancellationToken);
 
-            return base.Ok(new ApiResponseWithData<CancelSaleResponse>
-            {
-                Success = true,
-                Message = "Sale cancelled successfully",
-                Data = _mapper.Map<CancelSaleResponse>(response)
-            });
+            return Ok(_mapper.Map<CancelSaleResponse>(response));
+        }
+
+
+        /// <summary>
+        /// update a sale item by their ID
+        /// </summary>
+        /// <param name="request">Pagination and filter parameters</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Success response if the sale was updated</returns>
+        [HttpPut]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateSaleItem([FromBody] UpdateSaleRequest request , CancellationToken cancellationToken)
+        {
+            var command = _mapper.Map<UpdateSaleCommand>(request);
+            var response = await _mediator.Send(command, cancellationToken);
+
+            return Ok(_mapper.Map<UpdateSaleResponse>(response));
         }
     }
 }

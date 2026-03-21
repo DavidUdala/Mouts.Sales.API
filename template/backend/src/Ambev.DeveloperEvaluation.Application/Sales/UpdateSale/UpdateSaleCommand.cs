@@ -9,50 +9,15 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale;
 public class UpdateSaleCommand : IRequest<UpdateSaleResult>
 {
     /// <summary>
-    /// Gets or sets the unique identifier of the sale to update.
+    /// Gets or sets the unique identifier of the sale.
     /// </summary>
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Gets or sets the business-facing sale number.
+    /// Gets or sets the list of items to be included in the sale.
     /// </summary>
-    public string SaleNumber { get; set; } = string.Empty;
+    public UpdateSaleItemCommand Item { get; set; } = new();
 
-    /// <summary>
-    /// Gets the date and time of the last update to the sale's information.
-    /// </summary>
-    public DateTime? UpdatedAt { get; set; }
-
-    /// <summary>
-    /// Gets or sets the customer identifier.
-    /// </summary>
-    public Guid CustomerId { get; set; }
-
-    /// <summary>
-    /// Gets or sets the branch identifier where the sale took place.
-    /// </summary>
-    public Guid BranchId { get; set; }
-
-    /// <summary>
-    /// Gets or sets whether the sale is cancelled.
-    /// </summary>
-    public bool IsCancelled { get; set; }
-
-    /// <summary>
-    /// Gets or sets the line items of the sale.
-    /// </summary>
-    public List<UpdateSaleItemCommand> Items { get; set; } = [];
-
-    public ValidationResultDetail Validate()
-    {
-        var validator = new UpdateSaleCommandValidator();
-        var result = validator.Validate(this);
-        return new ValidationResultDetail
-        {
-            IsValid = result.IsValid,
-            Errors = result.Errors.Select(o => (ValidationErrorDetail)o)
-        };
-    }
 }
 
 /// <summary>
@@ -61,14 +26,9 @@ public class UpdateSaleCommand : IRequest<UpdateSaleResult>
 public class UpdateSaleItemCommand
 {
     /// <summary>
-    /// Gets or sets the product identifier.
+    /// Gets or sets the unique identifier of the item sale.
     /// </summary>
-    public Guid ProductId { get; set; }
-
-    /// <summary>
-    /// Gets or sets the quantity of the product.
-    /// </summary>
-    public int Quantity { get; set; }
+    public Guid Id { get; set; }
 
     /// <summary>
     /// Gets or sets the unit price of the product at the time of sale.
@@ -76,7 +36,7 @@ public class UpdateSaleItemCommand
     public decimal UnitPrice { get; set; }
 
     /// <summary>
-    /// Gets or sets the discount applied to this item.
+    /// Gets or sets the number of units of the product. Maximum of 20 identical items per sale.
     /// </summary>
-    public decimal Discount { get; set; }
+    public int Quantity { get; set; }
 }

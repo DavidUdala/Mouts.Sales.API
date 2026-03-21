@@ -46,28 +46,16 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
     /// <returns>The updated sale details</returns>
     public async Task<UpdateSaleResult> Handle(UpdateSaleCommand command, CancellationToken cancellationToken)
     {
-        var validator = new UpdateSaleCommandValidator();
-        var validationResult = await validator.ValidateAsync(command, cancellationToken);
-
-        if (!validationResult.IsValid)
-            throw new ValidationException(validationResult.Errors);
-
-        var existingSale = await _saleRepository.GetByIdAsync(command.Id, cancellationToken);
-        if (existingSale == null)
+        var sale = await _saleRepository.GetByIdAsync(command.Id, cancellationToken);
+        if (sale == null)
             throw new KeyNotFoundException($"Sale with ID {command.Id} not found");
 
-        // Detect items that were removed (cancelled) from the sale
-        var previousProductIds = existingSale.Items.Select(i => i.ProductId).ToHashSet();
+        if (sale.IsCancelled)
+            throw new InvalidOperationException($"Sale '{sale.SaleNumber}' is cancelled and cannot be modified.");
 
-        _mapper.Map(command, existingSale);
+        sale.UpdateItem(command.Item.Id, command.Item.Quantity, command.Item.UnitPrice);
 
-        var currentProductIds = existingSale.Items.Select(i => i.ProductId).ToHashSet();
-        var cancelledProductIds = previousProductIds.Except(currentProductIds).ToList();
-
-        existingSale.ApplyDiscounts();
-        existingSale.CalculateTotals();
-
-        var updatedSale = await _saleRepository.UpdateAsync(existingSale, cancellationToken);
+        var updatedSale = await _saleRepository.UpdateAsync(sale, cancellationToken);
 
         _logger.LogInformation(
             "Publishing {EventName} to message broker for Sale {SaleNumber}",
@@ -75,18 +63,6 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
             updatedSale.SaleNumber);
 
         await _bus.Publish(new SaleModifiedEvent(updatedSale.Id, updatedSale.SaleNumber, updatedSale.TotalAmount));
-
-        // Publish ItemCancelledEvent for each removed item
-        foreach (var productId in cancelledProductIds)
-        {
-            _logger.LogInformation(
-                "Publishing {EventName} to message broker for ProductId {ProductId} from Sale {SaleNumber}",
-                nameof(ItemCancelledEvent),
-                productId,
-                updatedSale.SaleNumber);
-
-            await _bus.Publish(new ItemCancelledEvent(updatedSale.Id, updatedSale.SaleNumber, productId));
-        }
 
         var result = _mapper.Map<UpdateSaleResult>(updatedSale);
         return result;

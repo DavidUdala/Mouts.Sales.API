@@ -123,6 +123,28 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         }
 
         /// <summary>
+        /// Updates a specific line item's quantity and unit price, then reapplies
+        /// discount rules and recalculates totals.
+        /// </summary>
+        /// <exception cref="DomainException">Thrown when the item is not found in this sale.</exception>
+        public void UpdateItem(Guid itemId, int quantity, decimal unitPrice)
+        {
+            var item = Items.FirstOrDefault(i => i.Id == itemId);
+            if (item == null)
+                throw new DomainException($"Item with ID '{itemId}' not found in sale '{SaleNumber}'.");
+
+            if (item.IsCancelled)
+                throw new DomainException($"Item is cancelled and cannot be modified.");
+
+            item.Quantity = quantity;
+            item.UnitPrice = unitPrice;
+
+            ApplyDiscounts();
+            CalculateTotals();
+            Update();
+        }
+
+        /// <summary>
         /// Cancels the sale and all its line items.
         /// </summary>
         /// <exception cref="DomainException">Thrown when the sale is already cancelled.</exception>

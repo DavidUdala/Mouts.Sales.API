@@ -13,9 +13,6 @@ public class UpdateSaleProfile : Profile
     /// </summary>
     public UpdateSaleProfile()
     {
-        CreateMap<UpdateSaleCommand, Sale>()
-            .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
-        CreateMap<UpdateSaleItemCommand, Domain.Entities.SaleItem>();
         CreateMap<Sale, UpdateSaleResult>();
     }
 }
