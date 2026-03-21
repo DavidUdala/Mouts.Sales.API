@@ -14,7 +14,11 @@ public class GetSaleProfile : Profile
     /// </summary>
     public GetSaleProfile()
     {
-        CreateMap<Sale, GetSaleResult>();
-        CreateMap<Domain.Entities.SaleItem, GetSaleItemResult>();
+        CreateMap<Sale, GetSaleResult>()
+            .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.Customer.Username))
+            .ForMember(dest => dest.BranchName,   opt => opt.MapFrom(src => src.Branch.Name));
+
+        CreateMap<Domain.Entities.SaleItem, GetSaleItemResult>()
+            .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name));
     }
 }
