@@ -13,23 +13,20 @@ public class ItemCancelledEvent
     /// <summary>
     /// The business-facing sale number.
     /// </summary>
-    public string SaleNumber { get; }
+    public Guid SaleItemId { get; }
 
-    /// <summary>
-    /// The unique identifier of the product that was cancelled.
-    /// </summary>
-    public Guid ProductId { get; }
+    public string SaleNumber { get; set; }
 
     /// <summary>
     /// The date when the event occurred.
     /// </summary>
     public DateTime OccurredAt { get; }
 
-    public ItemCancelledEvent(Guid saleId, string saleNumber, Guid productId)
+    public ItemCancelledEvent(Guid saleId, Guid saleItemId, string saleNumber)
     {
         SaleId = saleId;
-        SaleNumber = saleNumber;
-        ProductId = productId;
+        SaleItemId = saleItemId;
         OccurredAt = DateTime.UtcNow;
+        SaleNumber = saleNumber;
     }
 }

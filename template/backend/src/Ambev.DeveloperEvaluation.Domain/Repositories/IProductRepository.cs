@@ -47,4 +47,5 @@ public interface IProductRepository
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The list of products found for the given identifiers</returns>
     Task<IEnumerable<Product>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Product>> GetAllAsync(CancellationToken cancellationToken = default);
 }

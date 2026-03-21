@@ -19,9 +19,9 @@ public class ItemCancelledEventHandler : IHandleMessages<ItemCancelledEvent>
     public Task Handle(ItemCancelledEvent message)
     {
         _logger.LogInformation(
-            "Event {EventName} - Item (ProductId: {ProductId}) cancelled from Sale {SaleNumber} (ID: {SaleId}) at {OccurredAt}",
+            "Event {EventName} - Item (SaleItemId: {SaleItemId}) cancelled from Sale {SaleNumber} (ID: {SaleId}) at {OccurredAt}",
             nameof(ItemCancelledEvent),
-            message.ProductId,
+            message.SaleItemId,
             message.SaleNumber,
             message.SaleId,
             message.OccurredAt);

@@ -86,4 +86,9 @@ public class ProductRepository : IProductRepository
         await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
+
+    public async Task<IEnumerable<Product>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.Products.ToListAsync();
+    }
 }

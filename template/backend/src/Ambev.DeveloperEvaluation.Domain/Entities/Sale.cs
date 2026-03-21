@@ -114,7 +114,7 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         /// </summary>
         public void CalculateTotals()
         {
-            foreach (var item in Items)
+            foreach (var item in Items.Where(x => !x.IsCancelled))
             {
                 item.TotalAmount = (item.Quantity * item.UnitPrice) * (1 - item.Discount / 100);
             }
@@ -167,6 +167,17 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         public void Update()
         {
             UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void CancelItem(Guid itemId)
+        {
+            var item = Items.FirstOrDefault(i => i.Id == itemId)
+                ?? throw new DomainException($"Item {itemId} not found in sale.");
+
+            item.Cancel();
+            ApplyDiscounts();
+            CalculateTotals();
+            Update();
         }
     }
 }
