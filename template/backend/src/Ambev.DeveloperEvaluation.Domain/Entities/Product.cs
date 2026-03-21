@@ -20,12 +20,6 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         public string Description { get; set; } = string.Empty;
 
         /// <summary>
-        /// Current base price of the product.
-        /// to preserve the price at the time of purchase.
-        /// </summary>
-        public decimal Price { get; set; }
-
-        /// <summary>
         /// Collection of all sale line items that reference this product.
         /// </summary>
         public ICollection<SaleItem> SaleItems { get; set; } = [];
