@@ -3,7 +3,7 @@
     /// <summary>
     /// Query parameters for retrieving a paginated and filtered list of sales.
     /// </summary>
-    public class GetSaleRequest
+    public class GetSalesRequest
     {
         /// <summary>Page number (1-based). Defaults to 1.</summary>
         public int Page { get; set; } = 1;

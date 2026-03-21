@@ -13,9 +13,9 @@ public class GetSalesProfile : Profile
     /// </summary>
     public GetSalesProfile()
     {
-        CreateMap<GetSaleRequest, GetSalesQuery>();
+        CreateMap<GetSalesRequest, GetSalesQuery>();
 
-        CreateMap<GetSalesItemResult, GetSaleResponse>();
-        CreateMap<GetSalesLineItemResult, GetSaleItemResponse>();
+        CreateMap<GetSalesItemResult, GetSalesResponse>();
+        CreateMap<GetSalesLineItemResult, GetSalesItemResponse>();
     }
 }

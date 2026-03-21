@@ -7,6 +7,8 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.GetSale;
 /// </summary>
 public class GetSaleResult
 {
+    public Guid Id { get; set; }
+
     /// <summary>
     /// The business-facing sale number
     /// </summary>
