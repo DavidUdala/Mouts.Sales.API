@@ -37,6 +37,10 @@ namespace Ambev.DeveloperEvaluation.ORM.Mapping
                 .HasColumnType("numeric(18,2)")
                 .IsRequired();
 
+            builder.Property(i => i.IsCancelled)
+                .IsRequired()
+                .HasDefaultValue(false);
+
             builder.HasOne(i => i.Product)
                 .WithMany(p => p.SaleItems)
                 .HasForeignKey(i => i.ProductId)
