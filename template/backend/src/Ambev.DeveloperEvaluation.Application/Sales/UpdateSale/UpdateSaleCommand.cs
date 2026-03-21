@@ -19,9 +19,9 @@ public class UpdateSaleCommand : IRequest<UpdateSaleResult>
     public string SaleNumber { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets the date and time when the sale was made.
+    /// Gets the date and time of the last update to the sale's information.
     /// </summary>
-    public DateTime SaleDate { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the customer identifier.

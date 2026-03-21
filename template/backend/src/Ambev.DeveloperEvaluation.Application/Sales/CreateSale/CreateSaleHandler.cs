@@ -1,6 +1,5 @@
 using AutoMapper;
 using MediatR;
-using FluentValidation;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Events;
@@ -15,6 +14,9 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 public class CreateSaleHandler : IRequestHandler<CreateSaleCommand, CreateSaleResult>
 {
     private readonly ISaleRepository _saleRepository;
+    private readonly IUserRepository _userRepository;
+    private readonly IBranchRepository _branchRepository;
+    private readonly IProductRepository _productRepository;
     private readonly IMapper _mapper;
     private readonly IBus _bus;
     private readonly ILogger<CreateSaleHandler> _logger;
@@ -23,19 +25,27 @@ public class CreateSaleHandler : IRequestHandler<CreateSaleCommand, CreateSaleRe
     /// Initializes a new instance of CreateSaleHandler
     /// </summary>
     /// <param name="saleRepository">The sale repository</param>
+    /// <param name="userRepository">The user repository</param>
+    /// <param name="branchRepository">The branch repository</param>
     /// <param name="mapper">The AutoMapper instance</param>
     /// <param name="bus">The Rebus bus instance</param>
     /// <param name="logger">The logger instance</param>
     public CreateSaleHandler(
         ISaleRepository saleRepository,
+        IUserRepository userRepository,
+        IBranchRepository branchRepository,
+        IProductRepository productRepository,
         IMapper mapper,
         IBus bus,
         ILogger<CreateSaleHandler> logger)
     {
         _saleRepository = saleRepository;
+        _userRepository = userRepository;
+        _branchRepository = branchRepository;
         _mapper = mapper;
         _bus = bus;
         _logger = logger;
+        _productRepository = productRepository;
     }
 
     /// <summary>
@@ -46,24 +56,26 @@ public class CreateSaleHandler : IRequestHandler<CreateSaleCommand, CreateSaleRe
     /// <returns>The created sale details</returns>
     public async Task<CreateSaleResult> Handle(CreateSaleCommand command, CancellationToken cancellationToken)
     {
-        var validator = new CreateSaleCommandValidator();
-        var validationResult = await validator.ValidateAsync(command, cancellationToken);
+        var existingCustomer = await _userRepository.GetByIdAsync(command.CustomerId, cancellationToken);
+        if (existingCustomer == null)
+            throw new InvalidOperationException($"Customer with Id {command.CustomerId} not exists");
 
-        if (!validationResult.IsValid)
-            throw new ValidationException(validationResult.Errors);
+        var existingBranch = await _branchRepository.GetByIdAsync(command.BranchId, cancellationToken);
+        if (existingBranch == null)
+            throw new InvalidOperationException($"Branch with Id {command.BranchId} not exists");
 
-        var existingSale = await _saleRepository.GetBySaleNumberAsync(command.SaleNumber, cancellationToken);
-        if (existingSale != null)
-            throw new InvalidOperationException($"Sale with number {command.SaleNumber} already exists");
+        var productIds = command.Items.Select(i => i.ProductId).Distinct().ToList();
+        var foundProducts = await _productRepository.GetByIdsAsync(productIds, cancellationToken);
+
+        var missingIds = productIds.Except(foundProducts.Select(p => p.Id)).ToList();
+        if (missingIds.Any())
+            throw new InvalidOperationException($"Products not found: {string.Join(", ", missingIds)}");
 
         var sale = _mapper.Map<Sale>(command);
 
-        foreach (var item in sale.Items)
-        {
-            item.TotalAmount = (item.Quantity * item.UnitPrice) - ((item.Quantity * item.UnitPrice) * item.Discount / 100);
-        }
-
-        sale.TotalAmount = sale.Items.Sum(i => i.TotalAmount);
+        sale.GenerateSaleNumber();
+        sale.ApplyDiscounts();
+        sale.CalculateTotals();
 
         var createdSale = await _saleRepository.CreateAsync(sale, cancellationToken);
 

@@ -10,16 +10,6 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 public class CreateSaleCommand : IRequest<CreateSaleResult>
 {
     /// <summary>
-    /// Gets or sets the business-facing sale number.
-    /// </summary>
-    public string SaleNumber { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Gets or sets the date and time when the sale was made.
-    /// </summary>
-    public DateTime SaleDate { get; set; }
-
-    /// <summary>
     /// Gets or sets the customer identifier.
     /// </summary>
     public Guid CustomerId { get; set; }

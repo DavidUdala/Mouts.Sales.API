@@ -64,12 +64,8 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
         var currentProductIds = existingSale.Items.Select(i => i.ProductId).ToHashSet();
         var cancelledProductIds = previousProductIds.Except(currentProductIds).ToList();
 
-        foreach (var item in existingSale.Items)
-        {
-            item.TotalAmount = (item.Quantity * item.UnitPrice) - ((item.Quantity * item.UnitPrice) * item.Discount / 100);
-        }
-
-        existingSale.TotalAmount = existingSale.Items.Sum(i => i.TotalAmount);
+        existingSale.ApplyDiscounts();
+        existingSale.CalculateTotals();
 
         var updatedSale = await _saleRepository.UpdateAsync(existingSale, cancellationToken);
 

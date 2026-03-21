@@ -20,10 +20,6 @@ public class UpdateSaleCommandValidator : AbstractValidator<UpdateSaleCommand>
             .NotEmpty()
             .WithMessage("Sale number is required");
 
-        RuleFor(sale => sale.SaleDate)
-            .NotEmpty()
-            .WithMessage("Sale date is required");
-
         RuleFor(sale => sale.CustomerId)
             .NotEmpty()
             .WithMessage("Customer ID is required");

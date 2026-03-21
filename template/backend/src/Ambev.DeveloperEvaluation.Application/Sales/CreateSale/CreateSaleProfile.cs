@@ -17,5 +17,6 @@ public class CreateSaleProfile : Profile
         CreateMap<CreateSaleCommand, Sale>();
         CreateMap<CreateSaleItemCommand, Domain.Entities.SaleItem>();
         CreateMap<Sale, CreateSaleResult>();
+        CreateMap<Domain.Entities.SaleItem, CreateSaleItemResult>();
     }
 }

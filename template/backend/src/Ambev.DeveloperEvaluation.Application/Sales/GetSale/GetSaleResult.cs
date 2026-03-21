@@ -15,7 +15,7 @@ public class GetSaleResult
     /// <summary>
     /// The date and time when the sale was made
     /// </summary>
-    public DateTime SaleDate { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     /// <summary>
     /// The customer identifier

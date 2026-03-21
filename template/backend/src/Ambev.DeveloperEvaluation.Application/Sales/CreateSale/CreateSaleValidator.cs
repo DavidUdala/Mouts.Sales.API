@@ -13,52 +13,16 @@ public class CreateSaleCommandValidator : AbstractValidator<CreateSaleCommand>
     /// </summary>
     public CreateSaleCommandValidator()
     {
-        RuleFor(sale => sale.SaleNumber)
-            .NotEmpty()
-            .WithMessage("Sale number is required");
-
-        RuleFor(sale => sale.SaleDate)
-            .NotEmpty()
-            .WithMessage("Sale date is required");
-
-        RuleFor(sale => sale.CustomerId)
-            .NotEmpty()
-            .WithMessage("Customer ID is required");
-
-        RuleFor(sale => sale.BranchId)
-            .NotEmpty()
-            .WithMessage("Branch ID is required");
-
-        RuleFor(sale => sale.Items)
-            .NotEmpty()
-            .WithMessage("Sale must have at least one item");
+        RuleFor(sale => sale.CustomerId).NotEmpty();
+        RuleFor(sale => sale.BranchId).NotEmpty();
+        RuleFor(sale => sale.Items).NotEmpty().WithMessage("Sale must have at least one product.");
 
         RuleForEach(sale => sale.Items)
-            .SetValidator(new CreateSaleItemCommandValidator());
-    }
-}
-
-/// <summary>
-/// Validator for CreateSaleItemCommand.
-/// </summary>
-public class CreateSaleItemCommandValidator : AbstractValidator<CreateSaleItemCommand>
-{
-    public CreateSaleItemCommandValidator()
-    {
-        RuleFor(item => item.ProductId)
-            .NotEmpty()
-            .WithMessage("Product ID is required");
-
-        RuleFor(item => item.Quantity)
-            .GreaterThan(0)
-            .WithMessage("Quantity must be greater than zero");
-
-        RuleFor(item => item.UnitPrice)
-            .GreaterThan(0)
-            .WithMessage("Unit price must be greater than zero");
-
-        RuleFor(item => item.Discount)
-            .GreaterThanOrEqualTo(0)
-            .WithMessage("Discount cannot be negative");
+            .ChildRules(item =>
+            {
+                item.RuleFor(i => i.ProductId).NotEmpty();
+                item.RuleFor(i => i.Quantity).GreaterThan(0).LessThanOrEqualTo(20).WithMessage("Quantity must be greater than 0 and less than or equal to 20.");
+                item.RuleFor(i => i.UnitPrice).GreaterThan(0).Must(price => decimal.Round(price, 2) == price).WithMessage("Unit price must have exactly 2 decimal places.");
+            });
     }
 }
