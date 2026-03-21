@@ -42,9 +42,26 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         public decimal TotalAmount { get; set; }
 
         /// <summary>
+        /// Indicates whether this individual line item has been cancelled.
+        /// </summary>
+        public bool IsCancelled { get; set; }
+
+        /// <summary>
         /// Navigation property to the parent sale.
         /// </summary>
         public Sale Sale { get; set; } = new ();
+
+        /// <summary>
+        /// Cancels this line item.
+        /// </summary>
+        /// <exception cref="DomainException">Thrown when the item is already cancelled.</exception>
+        public void Cancel()
+        {
+            if (IsCancelled)
+                throw new DomainException($"Item for product '{ProductId}' is already cancelled.");
+
+            IsCancelled = true;
+        }
 
         /// <summary>
         /// Navigation property to the product associated with this line item.
