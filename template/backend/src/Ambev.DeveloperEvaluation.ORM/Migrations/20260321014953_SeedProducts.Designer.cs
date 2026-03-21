@@ -96,84 +96,21 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("numeric");
-
                     b.HasKey("Id");
 
                     b.ToTable("Product", (string)null);
 
                     b.HasData(
-                        new
-                        {
-                            Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            Description = "Cerveja Skol lata 350ml",
-                            Name = "Skol 350ml",
-                            Price = 0m
-                        },
-                        new
-                        {
-                            Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            Description = "Cerveja Brahma lata 350ml",
-                            Name = "Brahma 350ml",
-                            Price = 0m
-                        },
-                        new
-                        {
-                            Id = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            Description = "Cerveja Antarctica garrafa 600ml",
-                            Name = "Antarctica 600ml",
-                            Price = 0m
-                        },
-                        new
-                        {
-                            Id = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
-                            Description = "Cerveja Stella Artois garrafa 550ml",
-                            Name = "Stella Artois 550ml",
-                            Price = 0m
-                        },
-                        new
-                        {
-                            Id = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
-                            Description = "Cerveja Budweiser lata 350ml",
-                            Name = "Budweiser 350ml",
-                            Price = 0m
-                        },
-                        new
-                        {
-                            Id = new Guid("ffffffff-ffff-ffff-ffff-ffffffffffff"),
-                            Description = "Cerveja Original garrafa 600ml",
-                            Name = "Original 600ml",
-                            Price = 0m
-                        },
-                        new
-                        {
-                            Id = new Guid("11111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            Description = "Cerveja Bohemia garrafa 600ml",
-                            Name = "Bohemia 600ml",
-                            Price = 0m
-                        },
-                        new
-                        {
-                            Id = new Guid("22222222-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            Description = "Cerveja Corona garrafa long neck 330ml",
-                            Name = "Corona 330ml",
-                            Price = 0m
-                        },
-                        new
-                        {
-                            Id = new Guid("33333333-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            Description = "Refrigerante Guaraná Antarctica garrafa 2L",
-                            Name = "Guaraná Antarctica 2L",
-                            Price = 0m
-                        },
-                        new
-                        {
-                            Id = new Guid("44444444-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            Description = "Bebida com gás sabor limão 500ml",
-                            Name = "H2OH! Limão 500ml",
-                            Price = 0m
-                        });
+                        new { Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), Description = "Cerveja Skol lata 350ml",                    Name = "Skol 350ml" },
+                        new { Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), Description = "Cerveja Brahma lata 350ml",                  Name = "Brahma 350ml" },
+                        new { Id = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), Description = "Cerveja Antarctica garrafa 600ml",           Name = "Antarctica 600ml" },
+                        new { Id = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), Description = "Cerveja Stella Artois garrafa 550ml",        Name = "Stella Artois 550ml" },
+                        new { Id = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), Description = "Cerveja Budweiser lata 350ml",               Name = "Budweiser 350ml" },
+                        new { Id = new Guid("ffffffff-ffff-ffff-ffff-ffffffffffff"), Description = "Cerveja Original garrafa 600ml",             Name = "Original 600ml" },
+                        new { Id = new Guid("11111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), Description = "Cerveja Bohemia garrafa 600ml",              Name = "Bohemia 600ml" },
+                        new { Id = new Guid("22222222-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), Description = "Cerveja Corona long neck 330ml",             Name = "Corona 330ml" },
+                        new { Id = new Guid("33333333-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), Description = "Refrigerante Guaraná Antarctica garrafa 2L", Name = "Guaraná Antarctica 2L" },
+                        new { Id = new Guid("44444444-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), Description = "Bebida com gás sabor limão 500ml",           Name = "H2OH! Limão 500ml" });
                 });
 
             modelBuilder.Entity("Ambev.DeveloperEvaluation.Domain.Entities.Sale", b =>

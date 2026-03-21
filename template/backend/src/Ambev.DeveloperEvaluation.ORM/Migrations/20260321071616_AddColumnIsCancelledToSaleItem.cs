@@ -63,9 +63,6 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                 keyColumn: "Id",
                 keyValue: new Guid("ffffffff-ffff-ffff-ffff-ffffffffffff"));
 
-            migrationBuilder.DropColumn(
-                name: "Price",
-                table: "Product");
 
             migrationBuilder.AddColumn<bool>(
                 name: "IsCancelled",
@@ -81,13 +78,6 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
             migrationBuilder.DropColumn(
                 name: "IsCancelled",
                 table: "SaleItem");
-
-            migrationBuilder.AddColumn<decimal>(
-                name: "Price",
-                table: "Product",
-                type: "numeric",
-                nullable: false,
-                defaultValue: 0m);
 
             migrationBuilder.InsertData(
                 table: "Product",
