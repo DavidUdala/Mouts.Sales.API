@@ -25,9 +25,19 @@ public class GetSaleResult
     public Guid CustomerId { get; set; }
 
     /// <summary>
+    /// The denormalized customer name
+    /// </summary>
+    public string CustomerName { get; set; } = string.Empty;
+
+    /// <summary>
     /// The branch identifier
     /// </summary>
     public Guid BranchId { get; set; }
+
+    /// <summary>
+    /// The denormalized branch name
+    /// </summary>
+    public string BranchName { get; set; } = string.Empty;
 
     /// <summary>
     /// The total monetary value of the sale
