@@ -38,4 +38,13 @@ public interface IProductRepository
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>True if the product was deleted, false if not found</returns>
     Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves all products whose identifiers are contained in the provided set.
+    /// Used to validate product existence in bulk before processing a sale.
+    /// </summary>
+    /// <param name="ids">The collection of product identifiers to look up</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The list of products found for the given identifiers</returns>
+    Task<IEnumerable<Product>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default);
 }
