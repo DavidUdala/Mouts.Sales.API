@@ -36,4 +36,7 @@ public class GetSalesQuery : IRequest<GetSalesResult>
 
     /// <summary>Filters sales with total amount less than or equal to this value.</summary>
     public decimal? MaxTotal { get; set; }
+
+    /// <summary>Ordering string, e.g. "saleDate desc, totalAmount asc". Defaults to newest first.</summary>
+    public string? Order { get; set; }
 }

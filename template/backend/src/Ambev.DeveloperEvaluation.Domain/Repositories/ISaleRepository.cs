@@ -60,6 +60,7 @@ public interface ISaleRepository
     /// <param name="maxDate">Filter sales created on or before this date</param>
     /// <param name="minTotal">Filter sales with total amount >= this value</param>
     /// <param name="maxTotal">Filter sales with total amount <= this value</param>
+    /// <param name="order">Ordering string, e.g. "saleDate desc, totalAmount asc"</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>A tuple with the matching sales and the total count before pagination</returns>
     Task<(IEnumerable<Sale> Items, int TotalCount)> GetSalesAsync(
@@ -73,5 +74,6 @@ public interface ISaleRepository
         DateTime? maxDate = null,
         decimal? minTotal = null,
         decimal? maxTotal = null,
+        string? order = null,
         CancellationToken cancellationToken = default);
 }

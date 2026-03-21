@@ -46,6 +46,7 @@ public class GetSalesHandler : IRequestHandler<GetSalesQuery, GetSalesResult>
             maxDate:      query.MaxDate,
             minTotal:     query.MinTotal,
             maxTotal:     query.MaxTotal,
+            order:        query.Order,
             cancellationToken: cancellationToken
         );
 

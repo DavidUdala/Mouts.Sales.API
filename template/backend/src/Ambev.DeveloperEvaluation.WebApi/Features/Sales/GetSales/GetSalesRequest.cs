@@ -1,4 +1,6 @@
-﻿namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSales
+﻿using Microsoft.AspNetCore.Mvc;
+
+namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSales
 {
     /// <summary>
     /// Query parameters for retrieving a paginated and filtered list of sales.
@@ -6,9 +8,11 @@
     public class GetSalesRequest
     {
         /// <summary>Page number (1-based). Defaults to 1.</summary>
+        [FromQuery(Name = "_page")]
         public int Page { get; set; } = 1;
 
         /// <summary>Number of items per page. Defaults to 10.</summary>
+        [FromQuery(Name = "_size")]
         public int Size { get; set; } = 10;
 
         /// <summary>Filter by customer name. Supports wildcard: "John*" or "*Smith".</summary>
@@ -34,5 +38,9 @@
 
         /// <summary>Filter sales with total amount <= this value.</summary>
         public decimal? MaxTotal { get; set; }
+
+        /// <summary>Ordering string, e.g. "saleDate desc, totalAmount asc".</summary>
+        [FromQuery(Name = "_order")]
+        public string? Order { get; set; }
     }
 }

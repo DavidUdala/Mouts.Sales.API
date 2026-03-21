@@ -28,6 +28,16 @@ public class SaleRepository : ISaleRepository
     /// <returns>The created sale</returns>
     public async Task<Sale> CreateAsync(Sale sale, CancellationToken cancellationToken = default)
     {
+        // Prevent EF Core from traversing = new() stubs and inserting ghost entities.
+        // The FK properties (CustomerId, BranchId, ProductId) carry the real references.
+        sale.Customer = null!;
+        sale.Branch = null!;
+        foreach (var item in sale.Items)
+        {
+            item.Product = null!;
+            item.Sale = null!;
+        }
+
         await _context.Sales.AddAsync(sale, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
         return sale;
@@ -89,6 +99,7 @@ public class SaleRepository : ISaleRepository
         DateTime? maxDate = null,
         decimal? minTotal = null,
         decimal? maxTotal = null,
+        string? order = null,
         CancellationToken cancellationToken = default)
     {
         var query = _context.Sales
@@ -104,7 +115,7 @@ public class SaleRepository : ISaleRepository
             {
                 var v when v.StartsWith("*") => query.Where(s => EF.Functions.ILike(s.Customer.Username, $"%{v.TrimStart('*')}")),
                 var v when v.EndsWith("*")   => query.Where(s => EF.Functions.ILike(s.Customer.Username, $"{v.TrimEnd('*')}%")),
-                _                            => query.Where(s => EF.Functions.ILike(s.Customer.Username, customerName))
+                _                            => query.Where(s => EF.Functions.ILike(s.Customer.Username, $"%{customerName}%"))
             };
 
         if (!string.IsNullOrWhiteSpace(branchName))
@@ -112,7 +123,7 @@ public class SaleRepository : ISaleRepository
             {
                 var v when v.StartsWith("*") => query.Where(s => EF.Functions.ILike(s.Branch.Name, $"%{v.TrimStart('*')}")),
                 var v when v.EndsWith("*")   => query.Where(s => EF.Functions.ILike(s.Branch.Name, $"{v.TrimEnd('*')}%")),
-                _                            => query.Where(s => EF.Functions.ILike(s.Branch.Name, branchName))
+                _                            => query.Where(s => EF.Functions.ILike(s.Branch.Name, $"%{branchName}%"))
             };
 
         if (!string.IsNullOrWhiteSpace(saleNumber))
@@ -133,6 +144,8 @@ public class SaleRepository : ISaleRepository
         if (maxTotal.HasValue)
             query = query.Where(s => s.TotalAmount <= maxTotal.Value);
 
+        query = ApplyOrdering(query, order);
+
         var totalCount = await query.CountAsync(cancellationToken);
         var items = await query
             .Skip((page - 1) * size)
@@ -140,6 +153,49 @@ public class SaleRepository : ISaleRepository
             .ToListAsync(cancellationToken);
 
         return (items, totalCount);
+    }
+
+    private static IQueryable<Sale> ApplyOrdering(IQueryable<Sale> query, string? order)
+    {
+        if (string.IsNullOrWhiteSpace(order))
+            return query.OrderByDescending(s => s.CreatedAt);
+
+        IOrderedQueryable<Sale>? ordered = null;
+        foreach (var segment in order.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var parts = segment.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var field = parts[0].ToLowerInvariant();
+            var desc = parts.Length > 1 && parts[1].Equals("desc", StringComparison.OrdinalIgnoreCase);
+
+            ordered = (ordered, field, desc) switch
+            {
+                (null, "salenumber",  false) => query.OrderBy(s => s.SaleNumber),
+                (null, "salenumber",  true)  => query.OrderByDescending(s => s.SaleNumber),
+                (null, "saledate" or "createdat", false) => query.OrderBy(s => s.CreatedAt),
+                (null, "saledate" or "createdat", true)  => query.OrderByDescending(s => s.CreatedAt),
+                (null, "totalamount", false) => query.OrderBy(s => s.TotalAmount),
+                (null, "totalamount", true)  => query.OrderByDescending(s => s.TotalAmount),
+                (null, "customername", false) => query.OrderBy(s => s.Customer.Username),
+                (null, "customername", true)  => query.OrderByDescending(s => s.Customer.Username),
+                (null, "branchname",  false) => query.OrderBy(s => s.Branch.Name),
+                (null, "branchname",  true)  => query.OrderByDescending(s => s.Branch.Name),
+                (null, _, _) => query.OrderByDescending(s => s.CreatedAt),
+
+                (_, "salenumber",  false) => ordered!.ThenBy(s => s.SaleNumber),
+                (_, "salenumber",  true)  => ordered!.ThenByDescending(s => s.SaleNumber),
+                (_, "saledate" or "createdat", false) => ordered!.ThenBy(s => s.CreatedAt),
+                (_, "saledate" or "createdat", true)  => ordered!.ThenByDescending(s => s.CreatedAt),
+                (_, "totalamount", false) => ordered!.ThenBy(s => s.TotalAmount),
+                (_, "totalamount", true)  => ordered!.ThenByDescending(s => s.TotalAmount),
+                (_, "customername", false) => ordered!.ThenBy(s => s.Customer.Username),
+                (_, "customername", true)  => ordered!.ThenByDescending(s => s.Customer.Username),
+                (_, "branchname",  false) => ordered!.ThenBy(s => s.Branch.Name),
+                (_, "branchname",  true)  => ordered!.ThenByDescending(s => s.Branch.Name),
+                _ => ordered!.ThenByDescending(s => s.CreatedAt)
+            };
+        }
+
+        return ordered ?? query.OrderByDescending(s => s.CreatedAt);
     }
 
     /// <summary>
