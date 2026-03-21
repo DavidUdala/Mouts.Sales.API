@@ -2,6 +2,7 @@ using AutoMapper;
 using MediatR;
 using FluentValidation;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using Microsoft.Extensions.Logging;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.GetSale;
 
@@ -12,16 +13,19 @@ public class GetSaleHandler : IRequestHandler<GetSaleCommand, GetSaleResult>
 {
     private readonly ISaleRepository _saleRepository;
     private readonly IMapper _mapper;
+    private readonly ILogger<GetSaleHandler> _logger;
 
     /// <summary>
     /// Initializes a new instance of GetSaleHandler
     /// </summary>
     /// <param name="saleRepository">The sale repository</param>
     /// <param name="mapper">The AutoMapper instance</param>
-    public GetSaleHandler(ISaleRepository saleRepository, IMapper mapper)
+    /// <param name="logger">The logger instance</param>
+    public GetSaleHandler(ISaleRepository saleRepository, IMapper mapper, ILogger<GetSaleHandler> logger)
     {
         _saleRepository = saleRepository;
         _mapper = mapper;
+        _logger = logger;
     }
 
     /// <summary>
@@ -32,6 +36,10 @@ public class GetSaleHandler : IRequestHandler<GetSaleCommand, GetSaleResult>
     /// <returns>The sale details if found</returns>
     public async Task<GetSaleResult> Handle(GetSaleCommand request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation(
+            "Retrieving sale with ID {SaleId}",
+            request.Id);
+
         var sale = await _saleRepository.GetByIdAsync(request.Id, cancellationToken);
         if (sale == null)
             throw new KeyNotFoundException($"Sale with ID {request.Id} not found");
