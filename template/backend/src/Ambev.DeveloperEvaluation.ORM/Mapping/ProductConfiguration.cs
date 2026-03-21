@@ -22,9 +22,6 @@ namespace Ambev.DeveloperEvaluation.ORM.Mapping
             builder.Property(p => p.Description)
                 .HasMaxLength(1000);
 
-            builder.Property(p => p.Price)
-                .HasColumnType("numeric(18,2)")
-                .IsRequired();
         }
     }
 }

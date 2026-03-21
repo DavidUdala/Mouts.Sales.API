@@ -19,7 +19,7 @@ namespace Ambev.DeveloperEvaluation.ORM.Mapping
                 .HasMaxLength(50)
                 .IsRequired();
 
-            builder.Property(s => s.SaleDate)
+            builder.Property(s => s.CreatedAt)
                 .IsRequired();
 
             builder.Property(s => s.TotalAmount)

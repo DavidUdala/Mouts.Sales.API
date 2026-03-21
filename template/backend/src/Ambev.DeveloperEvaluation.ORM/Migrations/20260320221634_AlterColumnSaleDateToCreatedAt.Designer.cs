@@ -3,6 +3,7 @@ using System;
 using Ambev.DeveloperEvaluation.ORM;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Ambev.DeveloperEvaluation.ORM.Migrations
 {
     [DbContext(typeof(DefaultContext))]
-    partial class DefaultContextModelSnapshot : ModelSnapshot
+    [Migration("20260320221634_AlterColumnSaleDateToCreatedAt")]
+    partial class AlterColumnSaleDateToCreatedAt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -42,38 +45,6 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Branch", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            Address = "North Avenue, 100",
-                            Name = "Branch North"
-                        },
-                        new
-                        {
-                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            Address = "South Avenue, 200",
-                            Name = "Branch South"
-                        },
-                        new
-                        {
-                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
-                            Address = "East Street, 300",
-                            Name = "Branch East"
-                        },
-                        new
-                        {
-                            Id = new Guid("44444444-4444-4444-4444-444444444444"),
-                            Address = "West Street, 400",
-                            Name = "Branch West"
-                        },
-                        new
-                        {
-                            Id = new Guid("55555555-5555-5555-5555-555555555555"),
-                            Address = "Central Street, 500",
-                            Name = "Branch Central"
-                        });
                 });
 
             modelBuilder.Entity("Ambev.DeveloperEvaluation.Domain.Entities.Product", b =>
@@ -94,83 +65,11 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("numeric");
+                        .HasColumnType("numeric(18,2)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Product", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            Description = "Cerveja Skol lata 350ml",
-                            Name = "Skol 350ml",
-                            Price = 0m
-                        },
-                        new
-                        {
-                            Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            Description = "Cerveja Brahma lata 350ml",
-                            Name = "Brahma 350ml",
-                            Price = 0m
-                        },
-                        new
-                        {
-                            Id = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            Description = "Cerveja Antarctica garrafa 600ml",
-                            Name = "Antarctica 600ml",
-                            Price = 0m
-                        },
-                        new
-                        {
-                            Id = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
-                            Description = "Cerveja Stella Artois garrafa 550ml",
-                            Name = "Stella Artois 550ml",
-                            Price = 0m
-                        },
-                        new
-                        {
-                            Id = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
-                            Description = "Cerveja Budweiser lata 350ml",
-                            Name = "Budweiser 350ml",
-                            Price = 0m
-                        },
-                        new
-                        {
-                            Id = new Guid("ffffffff-ffff-ffff-ffff-ffffffffffff"),
-                            Description = "Cerveja Original garrafa 600ml",
-                            Name = "Original 600ml",
-                            Price = 0m
-                        },
-                        new
-                        {
-                            Id = new Guid("11111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            Description = "Cerveja Bohemia garrafa 600ml",
-                            Name = "Bohemia 600ml",
-                            Price = 0m
-                        },
-                        new
-                        {
-                            Id = new Guid("22222222-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            Description = "Cerveja Corona garrafa long neck 330ml",
-                            Name = "Corona 330ml",
-                            Price = 0m
-                        },
-                        new
-                        {
-                            Id = new Guid("33333333-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            Description = "Refrigerante Guaraná Antarctica garrafa 2L",
-                            Name = "Guaraná Antarctica 2L",
-                            Price = 0m
-                        },
-                        new
-                        {
-                            Id = new Guid("44444444-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            Description = "Bebida com gás sabor limão 500ml",
-                            Name = "H2OH! Limão 500ml",
-                            Price = 0m
-                        });
                 });
 
             modelBuilder.Entity("Ambev.DeveloperEvaluation.Domain.Entities.Sale", b =>
@@ -201,9 +100,6 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("numeric(18,2)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
