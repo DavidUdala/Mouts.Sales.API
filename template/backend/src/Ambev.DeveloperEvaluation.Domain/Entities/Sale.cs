@@ -121,5 +121,30 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
 
             TotalAmount = Items.Sum(i => i.TotalAmount);
         }
+
+        /// <summary>
+        /// Cancels the sale and all its line items.
+        /// </summary>
+        /// <exception cref="DomainException">Thrown when the sale is already cancelled.</exception>
+        public void Cancel()
+        {
+            if (IsCancelled)
+                throw new DomainException($"Sale '{SaleNumber}' is already cancelled.");
+
+            IsCancelled = true;
+
+            foreach (var item in Items.Where(i => !i.IsCancelled))
+                item.Cancel();
+
+            Update();
+        }
+
+        /// <summary>
+        /// Marks the sale as updated by refreshing the UpdatedAt timestamp.
+        /// </summary>
+        public void Update()
+        {
+            UpdatedAt = DateTime.UtcNow;
+        }
     }
 }
