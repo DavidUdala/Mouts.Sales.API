@@ -1,6 +1,7 @@
 using AutoMapper;
 using MediatR;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using Microsoft.Extensions.Logging;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.GetSales;
 
@@ -11,16 +12,19 @@ public class GetSalesHandler : IRequestHandler<GetSalesQuery, GetSalesResult>
 {
     private readonly ISaleRepository _saleRepository;
     private readonly IMapper _mapper;
+    private readonly ILogger<GetSalesHandler> _logger;
 
     /// <summary>
     /// Initializes a new instance of GetSalesHandler.
     /// </summary>
     /// <param name="saleRepository">The sale repository</param>
     /// <param name="mapper">The AutoMapper instance</param>
-    public GetSalesHandler(ISaleRepository saleRepository, IMapper mapper)
+    /// <param name="logger">The logger instance</param>
+    public GetSalesHandler(ISaleRepository saleRepository, IMapper mapper, ILogger<GetSalesHandler> logger)
     {
         _saleRepository = saleRepository;
         _mapper = mapper;
+        _logger = logger;
     }
 
     /// <summary>
@@ -44,6 +48,12 @@ public class GetSalesHandler : IRequestHandler<GetSalesQuery, GetSalesResult>
             maxTotal:     query.MaxTotal,
             cancellationToken: cancellationToken
         );
+
+        _logger.LogInformation(
+            "Retrieved {TotalCount} sales for page {Page} with size {PageSize}",
+            totalCount,
+            query.Page,
+            query.Size);
 
         return new GetSalesResult
         {
