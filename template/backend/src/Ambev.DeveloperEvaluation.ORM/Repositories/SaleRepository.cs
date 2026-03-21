@@ -28,7 +28,7 @@ public class SaleRepository : ISaleRepository
     /// <returns>The created sale</returns>
     public async Task<Sale> CreateAsync(Sale sale, CancellationToken cancellationToken = default)
     {
-        await _context.Set<Sale>().AddAsync(sale, cancellationToken);
+        await _context.Sales.AddAsync(sale, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
         return sale;
     }
@@ -41,8 +41,11 @@ public class SaleRepository : ISaleRepository
     /// <returns>The sale if found, null otherwise</returns>
     public async Task<Sale?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<Sale>()
+        return await _context.Sales
+            .Include(s => s.Customer)
+            .Include(s => s.Branch)
             .Include(s => s.Items)
+                .ThenInclude(i => i.Product)
             .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
     }
 
@@ -54,7 +57,7 @@ public class SaleRepository : ISaleRepository
     /// <returns>The sale if found, null otherwise</returns>
     public async Task<Sale?> GetBySaleNumberAsync(string saleNumber, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<Sale>()
+        return await _context.Sales
             .Include(s => s.Items)
             .FirstOrDefaultAsync(s => s.SaleNumber == saleNumber, cancellationToken);
     }
@@ -67,9 +70,76 @@ public class SaleRepository : ISaleRepository
     /// <returns>The updated sale</returns>
     public async Task<Sale> UpdateAsync(Sale sale, CancellationToken cancellationToken = default)
     {
-        _context.Set<Sale>().Update(sale);
+        _context.Sales.Update(sale);
         await _context.SaveChangesAsync(cancellationToken);
         return sale;
+    }
+
+    /// <summary>
+    /// Retrieves a paginated and filtered list of sales
+    /// </summary>
+    public async Task<(IEnumerable<Sale> Items, int TotalCount)> GetSalesAsync(
+        int page,
+        int size,
+        string? customerName = null,
+        string? branchName = null,
+        string? saleNumber = null,
+        bool? isCancelled = null,
+        DateTime? minDate = null,
+        DateTime? maxDate = null,
+        decimal? minTotal = null,
+        decimal? maxTotal = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.Sales
+            .AsNoTracking()
+            .Include(s => s.Customer)
+            .Include(s => s.Branch)
+            .Include(s => s.Items)
+                .ThenInclude(i => i.Product)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(customerName))
+            query = customerName switch
+            {
+                var v when v.StartsWith("*") => query.Where(s => EF.Functions.ILike(s.Customer.Username, $"%{v.TrimStart('*')}")),
+                var v when v.EndsWith("*")   => query.Where(s => EF.Functions.ILike(s.Customer.Username, $"{v.TrimEnd('*')}%")),
+                _                            => query.Where(s => EF.Functions.ILike(s.Customer.Username, customerName))
+            };
+
+        if (!string.IsNullOrWhiteSpace(branchName))
+            query = branchName switch
+            {
+                var v when v.StartsWith("*") => query.Where(s => EF.Functions.ILike(s.Branch.Name, $"%{v.TrimStart('*')}")),
+                var v when v.EndsWith("*")   => query.Where(s => EF.Functions.ILike(s.Branch.Name, $"{v.TrimEnd('*')}%")),
+                _                            => query.Where(s => EF.Functions.ILike(s.Branch.Name, branchName))
+            };
+
+        if (!string.IsNullOrWhiteSpace(saleNumber))
+            query = query.Where(s => s.SaleNumber == saleNumber);
+
+        if (isCancelled.HasValue)
+            query = query.Where(s => s.IsCancelled == isCancelled.Value);
+
+        if (minDate.HasValue)
+            query = query.Where(s => s.CreatedAt >= minDate.Value);
+
+        if (maxDate.HasValue)
+            query = query.Where(s => s.CreatedAt <= maxDate.Value);
+
+        if (minTotal.HasValue)
+            query = query.Where(s => s.TotalAmount >= minTotal.Value);
+
+        if (maxTotal.HasValue)
+            query = query.Where(s => s.TotalAmount <= maxTotal.Value);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
+            .Skip((page - 1) * size)
+            .Take(size)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
     }
 
     /// <summary>
@@ -84,7 +154,7 @@ public class SaleRepository : ISaleRepository
         if (sale == null)
             return false;
 
-        _context.Set<Sale>().Remove(sale);
+        _context.Sales.Remove(sale);
         await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
