@@ -1,0 +1,57 @@
+{
+  "info": {
+    "name": "User Setup - Create Test User",
+    "_postman_id": "user-setup-001",
+    "description": "Run this collection ONCE before the Sales CRUD collection.\nIt creates a test user and saves the userId as a collection variable.\n\nAfter running:\n1. Copy the userId from the 'userId' collection variable\n2. Paste it as the 'customerId' variable in the Sales CRUD collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl",      "value": "http://localhost:5119", "type": "string" },
+    { "key": "userId",       "value": "",                      "type": "string" },
+    { "key": "userEmail",    "value": "testuser@ambev.com",    "type": "string" },
+    { "key": "userPassword", "value": "Test@123456",           "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Create Test User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 201 Created', () => pm.response.to.have.status(201));",
+              "",
+              "pm.test('Response has userId', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.success).to.be.true;",
+              "  const id = (body.data && body.data.id) ? body.data.id : body.id;",
+              "  pm.expect(id).to.be.a('string').and.not.empty;",
+              "  pm.collectionVariables.set('userId', id);",
+              "  console.log('✅ userId saved:', id);",
+              "  console.log('➡ Copy this ID as customerId in the Sales CRUD collection');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "options": { "raw": { "language": "json" } },
+          "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"Test@123456\",\n  \"email\": \"testuser@ambev.com\",\n  \"phone\": \"(11) 99999-9999\",\n  \"status\": 1,\n  \"role\": 1\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/users",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "users"]
+        },
+        "description": "Creates a single test user.\n\nEnum values:\n- status: 1 = Active\n- role:   1 = Customer\n\nAfter success, the userId is saved in the collection variable 'userId'."
+      }
+    }
+  ]
+}
