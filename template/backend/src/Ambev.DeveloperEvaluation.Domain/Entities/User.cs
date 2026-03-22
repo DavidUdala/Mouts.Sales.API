@@ -79,6 +79,11 @@ public class User : BaseEntity, IUser
     string IUser.Role => Role.ToString();
 
     /// <summary>
+    /// Collection of all sales associated with this customer.
+    /// </summary>
+    public ICollection<Sale> Sales { get; set; } = [];
+
+    /// <summary>
     /// Initializes a new instance of the User class.
     /// </summary>
     public User()
