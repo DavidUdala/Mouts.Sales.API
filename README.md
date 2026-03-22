@@ -1,77 +1,146 @@
-# Developer Evaluation Project
+# Mouts Sales API
 
-`READ CAREFULLY`
+A RESTful API for managing sales records, built as a technical evaluation. Implements a complete sales CRUD with quantity-based discount rules, individual item cancellation, and domain event publishing.
 
-## Use Case
-**You are a developer on the DeveloperStore team. Now we need to implement the API prototypes.**
+---
 
-As we work with `DDD`, to reference entities from other domains, we use the `External Identities` pattern with denormalization of entity descriptions.
+## Table of Contents
 
-Therefore, you will write an API (complete CRUD) that handles sales records. The API needs to be able to inform:
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Accessing the Application](#accessing-the-application)
+- [Seed Data](#seed-data)
+- [Domain Events](#domain-events)
+- [Manual Testing with Postman](#manual-testing-with-postman)
 
-* Sale number
-* Date when the sale was made
-* Customer
-* Total sale amount
-* Branch where the sale was made
-* Products
-* Quantities
-* Unit prices
-* Discounts
-* Total amount for each item
-* Cancelled/Not Cancelled
-
-It's not mandatory, but it would be a differential to build code for publishing events of:
-* SaleCreated
-* SaleModified
-* SaleCancelled
-* ItemCancelled
-
-If you write the code, **it's not required** to actually publish to any Message Broker. You can log a message in the application log or however you find most convenient.
-
-### Business Rules
-
-* Purchases above 4 identical items have a 10% discount
-* Purchases between 10 and 20 identical items have a 20% discount
-* It's not possible to sell above 20 identical items
-* Purchases below 4 items cannot have a discount
-
-These business rules define quantity-based discounting tiers and limitations:
-
-1. Discount Tiers:
-   - 4+ items: 10% discount
-   - 10-20 items: 20% discount
-
-2. Restrictions:
-   - Maximum limit: 20 items per product
-   - No discounts allowed for quantities below 4 items
-
-## Overview
-This section provides a high-level overview of the project and the various skills and competencies it aims to assess for developer candidates. 
-
-See [Overview](/.doc/overview.md)
+---
 
 ## Tech Stack
-This section lists the key technologies used in the project, including the backend, testing, frontend, and database components. 
 
-See [Tech Stack](/.doc/tech-stack.md)
+- **.NET 8** / C# / ASP.NET Core Web API
+- **PostgreSQL** — relational database (via EF Core 8)
+- **MongoDB** — document database
+- **MediatR** — CQRS pattern (Commands / Queries / Handlers)
+- **AutoMapper** — object mapping
+- **FluentValidation** — request validation
+- **Rebus** — domain event publishing
+- **xUnit + NSubstitute + Bogus** — unit testing
+- **Docker / Docker Compose** — containerization
 
-## Frameworks
-This section outlines the frameworks and libraries that are leveraged in the project to enhance development productivity and maintainability. 
+---
 
-See [Frameworks](/.doc/frameworks.md)
+## Getting Started
 
-<!-- 
-## API Structure
-This section includes links to the detailed documentation for the different API resources:
-- [API General](./docs/general-api.md)
-- [Products API](/.doc/products-api.md)
-- [Carts API](/.doc/carts-api.md)
-- [Users API](/.doc/users-api.md)
-- [Auth API](/.doc/auth-api.md)
--->
+### Prerequisites
 
-## Project Structure
-This section describes the overall structure and organization of the project files and directories. 
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
+- Port `5432` free (PostgreSQL)
+- Port `8080` free (API)
 
-See [Project Structure](/.doc/project-structure.md)
+### Run with Docker Compose (recommended)
+
+```bash
+cd template/backend
+
+# First run or after code changes
+docker-compose up --build -d
+
+# Subsequent runs (no code changes)
+docker-compose up -d
+```
+
+> Migrations and seed data are applied automatically on startup. No manual `dotnet ef database update` needed.
+
+### Stop containers
+
+```bash
+docker-compose down
+```
+
+### Run locally (Visual Studio / Rider)
+
+1. Start only the database:
+   ```bash
+   cd template/backend
+   docker-compose up ambev.developerevaluation.database -d
+   ```
+2. Set the environment to `Development` (default in Visual Studio)
+3. Run the `Ambev.DeveloperEvaluation.WebApi` project
+
+The `appsettings.Development.json` already points to `localhost:5432` with the correct credentials.
+
+---
+
+## Accessing the Application
+
+| Resource | URL |
+|---|---|
+| **Swagger UI** | http://localhost:8080/swagger |
+| **API Base URL** | http://localhost:8080/api |
+| **Health Check** | http://localhost:8080/health |
+
+---
+
+## Seed Data
+
+The database is seeded automatically on first startup.
+
+### Branches
+
+| Name | ID |
+|---|---|
+| Branch North | `11111111-1111-1111-1111-111111111111` |
+| Branch South | `22222222-2222-2222-2222-222222222222` |
+| Branch East | `33333333-3333-3333-3333-333333333333` |
+| Branch West | `44444444-4444-4444-4444-444444444444` |
+| Branch Central | `55555555-5555-5555-5555-555555555555` |
+
+### Products
+
+| Product | ID |
+|---|---|
+| Skol 350ml | `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa` |
+| Brahma 350ml | `bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb` |
+| Antarctica 600ml | `cccccccc-cccc-cccc-cccc-cccccccccccc` |
+| Stella Artois 550ml | `dddddddd-dddd-dddd-dddd-dddddddddddd` |
+| Budweiser 350ml | `eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee` |
+| Original 600ml | `ffffffff-ffff-ffff-ffff-ffffffffffff` |
+| Bohemia 600ml | `11111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa` |
+| Corona 330ml | `22222222-aaaa-aaaa-aaaa-aaaaaaaaaaaa` |
+| Guaraná Antarctica 2L | `33333333-aaaa-aaaa-aaaa-aaaaaaaaaaaa` |
+| H2OH! Limão 500ml | `44444444-aaaa-aaaa-aaaa-aaaaaaaaaaaa` |
+
+> To create a sale, use any Branch ID and Product ID from the tables above. The `customerId` must be the ID of a user created via `POST /api/users`.
+
+---
+
+## Domain Events
+
+The application publishes domain events via **Rebus**. Events are logged to the application console and can be extended to integrate with external systems.
+
+| Event | Triggered when |
+|---|---|
+| `SaleCreated` | A new sale is created |
+| `SaleModified` | A sale item is updated |
+| `SaleCancelled` | A sale is cancelled |
+| `ItemCancelled` | A specific item is cancelled |
+
+---
+
+## Manual Testing with Postman
+
+The `.doc/` directory contains two ready-to-import Postman collections:
+
+| File | Description |
+|---|---|
+| `.doc/user-setup-collection.json` | Creates a test user and saves the `userId` as a collection variable |
+| `.doc/sales-crud-collection.json` | Full Sales CRUD: create, list, filter, paginate, sort, update and cancel |
+
+### Recommended flow
+
+1. Import both collections into Postman
+2. Run `user-setup-collection.json` — the `userId` is saved automatically
+3. Paste the `userId` as the `customerId` variable in the Sales collection
+4. Run requests individually or by folder
+
+The Sales collection covers **21 scenarios** across 7 folders: Create, Read, List & Filter, Pagination, Ordering, Update and Cancel.
