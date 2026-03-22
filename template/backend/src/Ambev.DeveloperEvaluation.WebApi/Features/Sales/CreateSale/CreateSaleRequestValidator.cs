@@ -8,7 +8,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale
     public class CreateSaleRequestValidator : AbstractValidator<CreateSaleRequest>
     {
         /// <summary>
-        /// Initializes a new instance of the CreateUserRequestValidator with defined validation rules.
+        /// Initializes a new instance of the CreateSaleRequestValidator with defined validation rules.
         /// </summary>
         /// Validation rules include:
         /// - CustomerId: Required

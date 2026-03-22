@@ -29,7 +29,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
         private readonly IMapper _mapper;
 
         /// <summary>
-        /// Initializes a new instance of UsersController
+        /// Initializes a new instance of SalesController
         /// </summary>
         /// <param name="mediator">The mediator instance</param>
         /// <param name="mapper">The AutoMapper instance</param>
@@ -42,9 +42,16 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
         /// <summary>
         /// Creates a new sale
         /// </summary>
-        /// <param name="request">The user creation request</param>
+        /// <param name="request">The sale creation request containing customerId, branchId and list of items</param>
         /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns>The created sale details</returns>
+        /// <returns>The created sale details including generated sale number and applied discounts</returns>
+        /// <remarks>
+        /// Discount rules applied per item:
+        /// - Quantity below 4: no discount
+        /// - Quantity 4–9: 10% discount
+        /// - Quantity 10–20: 20% discount
+        /// - Quantity above 20: not allowed
+        /// </remarks>
         [HttpPost]
         [ProducesResponseType(typeof(ApiResponseWithData<CreateSaleResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
@@ -64,7 +71,12 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
         /// <summary>
         /// Retrieves a paginated and filtered list of sales.
         /// </summary>
-        /// <param name="request">Pagination and filter parameters</param>
+        /// <param name="request">
+        /// Pagination and filter parameters:
+        /// _page (default 1), _size (default 10), _order (e.g. "saleDate desc, totalAmount asc"),
+        /// customerName (partial match), branchName (partial match), saleNumber (exact),
+        /// isCancelled, minDate, maxDate, minTotal, maxTotal
+        /// </param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>A paginated list of sales matching the given criteria</returns>
         [HttpGet]
@@ -85,9 +97,9 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
         }
 
         /// <summary>
-        /// Retrieves a sale by their ID
+        /// Retrieves a sale by its ID
         /// </summary>
-        /// <param name="id">The unique identifier of the sale</param>
+        /// <param name="id">The unique identifier of the sale (e.g. 3fa85f64-5717-4562-b3fc-2c963f66afa6)</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>The sale details if found</returns>
         [HttpGet("{id}")]
@@ -110,9 +122,9 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
         }
 
         /// <summary>
-        /// Cancel a sale by their ID
+        /// Cancels a sale by its ID
         /// </summary>
-        /// <param name="id">The unique identifier of the sale to cancel</param>
+        /// <param name="id">The unique identifier of the sale to cancel (e.g. 3fa85f64-5717-4562-b3fc-2c963f66afa6)</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Success response if the sale was cancelled</returns>
         [HttpDelete("{id}/Cancel")]
@@ -131,11 +143,11 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
 
 
         /// <summary>
-        /// update a sale item by their ID
+        /// Updates an item within a sale (quantity and unit price)
         /// </summary>
-        /// <param name="request">Pagination and filter parameters</param>
+        /// <param name="request">The update request containing the sale ID and the item to update with new quantity and unit price</param>
         /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns>Success response if the sale was updated</returns>
+        /// <returns>The updated sale number and ID</returns>
         [HttpPut]
         [ProducesResponseType(typeof(ApiResponseWithData<UpdateSaleResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
@@ -149,10 +161,15 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
         }
 
         /// <summary>
-        /// Cancels a specific item within a sale.
+        /// Cancels a specific item within a sale without cancelling the entire sale.
         /// </summary>
+        /// <param name="id">The unique identifier of the sale (e.g. 3fa85f64-5717-4562-b3fc-2c963f66afa6)</param>
+        /// <param name="itemId">The unique identifier of the item to cancel (e.g. 7c9e6679-7425-40de-944b-e07fc1f90ae7)</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>The sale ID, sale number, item ID and cancellation status</returns>
         [HttpDelete("{id}/items/{itemId}/cancel")]
-        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponseWithData<CancelSaleItemResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> CancelSaleItem([FromRoute] Guid id, [FromRoute] Guid itemId, CancellationToken cancellationToken)
         {

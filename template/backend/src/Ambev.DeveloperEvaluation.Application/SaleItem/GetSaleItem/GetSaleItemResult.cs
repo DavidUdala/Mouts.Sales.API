@@ -5,6 +5,9 @@
     /// </summary>
     public class GetSaleItemResult
     {
+        /// <summary>
+        /// The unique identifier of the sale item
+        /// </summary>
         public Guid Id { get; set; }
 
         /// <summary>
