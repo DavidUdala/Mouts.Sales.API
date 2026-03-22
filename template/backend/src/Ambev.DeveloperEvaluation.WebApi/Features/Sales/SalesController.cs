@@ -113,12 +113,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
             var command = _mapper.Map<GetSaleCommand>(request.Id);
             var response = await _mediator.Send(command, cancellationToken);
 
-            return Ok(new ApiResponseWithData<GetSaleResponse>
-            {
-                Success = true,
-                Message = "Sale retrieved successfully",
-                Data = _mapper.Map<GetSaleResponse>(response)
-            });
+            return Ok(_mapper.Map<GetSaleResponse>(response));
         }
 
         /// <summary>
@@ -176,12 +171,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
             var command = new CancelSaleItemCommand(id, itemId);
             var response = await _mediator.Send(command, cancellationToken);
 
-            return Ok(new ApiResponseWithData<CancelSaleItemResponse>
-            {
-                Success = true,
-                Message = "Sale item cancelled successfully",
-                Data = _mapper.Map<CancelSaleItemResponse>(response)
-            });
+            return Ok(_mapper.Map<CancelSaleItemResponse>(response));
         }
     }
 }

@@ -6,6 +6,11 @@
     public class CreateSaleResponse
     {
         /// <summary>
+        /// Gets or sets the unique identifier of the newly created sale.
+        /// </summary>
+        public Guid Id { get; set; }
+
+        /// <summary>
         /// Gets or sets the unique business-facing sale number generated for this sale.
         /// </summary>
         public string SaleNumber { get; set; } = string.Empty;
